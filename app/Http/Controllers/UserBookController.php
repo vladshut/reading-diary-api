@@ -8,6 +8,7 @@ use App\UserBook;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class UserBookController extends Controller
 {
@@ -18,6 +19,20 @@ class UserBookController extends Controller
     public function myBooks(): AnonymousResourceCollection
     {
         return UserBookResource::collection($this->getUser()->books()->paginate());
+    }
+
+    /**
+     * Display a listing of the resource.
+     * @param UserBook $userBook
+     * @return UserBookResource
+     */
+    public function show(UserBook $userBook): UserBookResource
+    {
+        if ($this->getUser()->id !== $userBook->user()->first('id')['id']) {
+            throw new BadRequestHttpException();
+        }
+
+        return new UserBookResource($userBook);
     }
 
     /**

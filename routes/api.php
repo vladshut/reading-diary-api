@@ -20,6 +20,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::get('dictionary', 'DictionaryController@index');
 
 Route::group(['middleware' => ['auth:api']], function () {
+    Route::get('books/my/{userBook}', 'UserBookController@show');
     Route::post('books/my/{userBook}/start-reading', 'UserBookController@startReading');
     Route::get('books/my', 'UserBookController@myBooks');
     Route::post('books/add-new', 'UserBookController@addNew');
