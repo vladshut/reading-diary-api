@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Book;
 use App\Http\Resources\UserBookResource;
 use App\UserBook;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Validation\ValidationException;
@@ -85,6 +86,45 @@ class UserBookController extends Controller
     {
         if ($this->getUser()->id === $userBook->user()->first('id')['id']) {
             $userBook->startReading();
+        }
+
+        return new UserBookResource($userBook);
+    }
+
+
+    public function finishReading(UserBook $userBook): UserBookResource
+    {
+        if ($this->getUser()->id === $userBook->user()->first('id')['id']) {
+            $userBook->finishReading();
+        }
+
+        return new UserBookResource($userBook);
+    }
+
+
+    /**
+     * @param UserBook $userBook
+     * @return UserBookResource
+     * @throws Exception
+     */
+    public function makePublic(UserBook $userBook): UserBookResource
+    {
+        if ($this->getUser()->id === $userBook->user()->first('id')['id']) {
+            $userBook->makeReportAccessibleViaPublicLink();
+        }
+
+        return new UserBookResource($userBook);
+    }
+
+    /**
+     * @param UserBook $userBook
+     * @return UserBookResource
+     * @throws Exception
+     */
+    public function makePrivate(UserBook $userBook): UserBookResource
+    {
+        if ($this->getUser()->id === $userBook->user()->first('id')['id']) {
+            $userBook->makeReportNotAccessibleViaPublicLink();
         }
 
         return new UserBookResource($userBook);

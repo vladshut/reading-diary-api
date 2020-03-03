@@ -110,6 +110,19 @@ class BookTest extends TestCase
         $this->assertDatabaseHas('book_user', ['id' => $userBook->id, 'status' => UserBook::STATUS_READING]);
     }
 
+    public function testFinishReading(): void
+    {
+        $user = $this->login();
+        $book = factory(Book::class)->create();
+        $userBook = $user->addBook($book);
+        $userBook->startReading();
+
+        $data = $this->jsonApi('POST', "books/my/{$userBook->id}/finish-reading", []);
+        $this->assertStructure($data, DataStructures::USER_BOOK);
+
+        $this->assertDatabaseHas('book_user', ['id' => $userBook->id, 'status' => UserBook::STATUS_READ]);
+    }
+
     /**
      * @dataProvider searchDataProvider
      * @param string $term

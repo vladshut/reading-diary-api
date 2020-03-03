@@ -8,13 +8,14 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * @property mixed id
- * @property mixed term
- * @property mixed definition
- * @property mixed book_section_id
- * @property mixed type
- * @property mixed book_user_id
- * @property mixed _id
+ * @property string id
+ * @property string term
+ * @property string definition
+ * @property string book_section_id
+ * @property string type
+ * @property string book_user_id
+ * @property string _id
+ * @property bool visibility
  * @method getCoverUrl()
  */
 class ReportItemResource extends JsonResource
@@ -35,6 +36,7 @@ class ReportItemResource extends JsonResource
             $data[$field] = $this->$field;
         }
 
+        $data['visibility'] = $this->visibility === null ? true : $this->visibility;
         $data['id'] = $this->_id;
 
         return $data;

@@ -58,4 +58,9 @@ class BookSection extends Model
     {
         return $this->hasMany(ReportItem::class)->orderBy('order');
     }
+
+    public function visibleReportItems(): HasMany
+    {
+        return $this->reportItems()->whereIn('visibility', [true, null]);
+    }
 }

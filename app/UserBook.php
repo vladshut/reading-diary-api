@@ -3,14 +3,19 @@
 namespace App;
 
 use DateTime;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * @property string status
  * @property DateTime start_reading_dt
+ * @property DateTime end_reading_dt
  * @property mixed id
+ * @property UuidInterface report_public_key
  */
 class UserBook extends Model
 {
@@ -62,6 +67,18 @@ class UserBook extends Model
         $this->save();
     }
 
+    public function finishReading(): void
+    {
+        if ($this->status !== self::STATUS_READING) {
+            return;
+        }
+
+        $this->status = self::STATUS_READ;
+        $this->end_reading_dt = new DateTime();
+
+        $this->save();
+    }
+
     public function sections(): HasMany
     {
         return $this->hasMany(BookSection::class, 'book_user_id');
@@ -74,7 +91,7 @@ class UserBook extends Model
         }
 
         $bookSection = new BookSection();
-        $bookSection->name = 'Book';
+        $bookSection->name = $this->book()->get()->first()->title;
         $bookSection->order = 1;
         $bookSection->book_user_id = $this->id;
         $bookSection->parent_id = null;
@@ -107,5 +124,36 @@ class UserBook extends Model
         $bookSection->save();
 
         return $bookSection;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function makeReportAccessibleViaPublicLink(): void
+    {
+        if (!$this->report_public_key) {
+            $this->report_public_key = Uuid::uuid4();
+            $this->save();
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function makeReportNotAccessibleViaPublicLink(): void
+    {
+        if ($this->report_public_key) {
+            $this->report_public_key = null;
+            $this->save();
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function regenerateReportPublicKey(): void
+    {
+        $this->report_public_key = Uuid::uuid4();
+        $this->save();
     }
 }

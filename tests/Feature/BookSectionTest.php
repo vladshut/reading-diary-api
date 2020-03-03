@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Author;
 use App\Book;
 use App\BookSection;
+use App\ReportItem;
+use App\UserBook;
 use Tests\DataStructures;
 use Tests\TestCase;
 
@@ -87,5 +89,37 @@ class BookSectionTest extends TestCase
 
         $this->assertDatabaseMissing('book_sections', ['id' => $section->id]);
         $this->assertDatabaseMissing('book_sections', ['id' => $subSection->id]);
+    }
+
+    private function createReportItems(UserBook $userBook, BookSection $bookSection): array
+    {
+        $reportItems = [];
+
+        foreach (ReportItem::TYPES as $type) {
+            $additionalFields = ReportItem::fieldsTypeMap($type, false);
+            $data = $this->createReportItemPayload($type, $additionalFields);
+            $data['book_section_id'] = $bookSection->id;
+            $data['book_user_id'] = $userBook->id;
+
+            $reportItem = new ReportItem($data);
+            $reportItem->save();
+
+            $reportItems[] = $reportItem;
+        }
+
+        return $reportItems;
+    }
+
+    private function createReportItemPayload(string $type, array $additionalFields = []): array
+    {
+        $payload = [
+            'type' => $type,
+        ];
+
+        foreach ($additionalFields as $field) {
+            $payload[$field] = 'Some value';
+        }
+
+        return $payload;
     }
 }

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
  * @property mixed end_reading_dt
  * @property mixed created_at
  * @property mixed id
+ * @property mixed report_public_key
  */
 class UserBookResource extends JsonResource
 {
@@ -33,6 +34,7 @@ class UserBookResource extends JsonResource
             'start_reading_dt' => $this->start_reading_dt,
             'end_reading_dt' => $this->end_reading_dt,
             'created_at' => $this->created_at,
+            'report_public_key' => $this->report_public_key,
         ];
     }
 }

@@ -18,10 +18,15 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::get('dictionary', 'DictionaryController@index');
+Route::get('public-report/{publicKey}', 'PublicUserBookController@show');
+Route::get('public-report/{publicKey}/sections', 'PublicUserBookController@sections');
 
 Route::group(['middleware' => ['auth:api']], function () {
     Route::get('books/my/{userBook}', 'UserBookController@show');
     Route::post('books/my/{userBook}/start-reading', 'UserBookController@startReading');
+    Route::post('books/my/{userBook}/finish-reading', 'UserBookController@finishReading');
+    Route::post('books/my/{userBook}/make-public', 'UserBookController@makePublic');
+    Route::post('books/my/{userBook}/make-private', 'UserBookController@makePrivate');
     Route::get('books/my', 'UserBookController@myBooks');
     Route::post('books/add-new', 'UserBookController@addNew');
     Route::post('books/add-existing', 'UserBookController@addExisting');

@@ -4,22 +4,15 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 /**
- * @property mixed author
  * @property mixed id
- * @property mixed title
- * @property mixed year
- * @property mixed pages
- * @property mixed isbn10
- * @property mixed isbn13
- * @property mixed lang
- * @property mixed description
  * @property mixed name
  * @property mixed order
  * @property mixed parent_id
+ * @property mixed reportItems
  * @method getCoverUrl()
+ * @method visibleReportItems()
  */
 class BookSectionResource extends JsonResource
 {
@@ -36,6 +29,7 @@ class BookSectionResource extends JsonResource
             'name' => $this->name,
             'order' => $this->order,
             'parent_id' => $this->parent_id,
+            'reportItems' => ReportItemResource::collection(auth()->user() ? $this->reportItems : $this->visibleReportItems()->get()),
         ];
     }
 }

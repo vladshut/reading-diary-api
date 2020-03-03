@@ -40,6 +40,12 @@ class ReportItem extends Model
 
     public function fill(array $attributes): self
     {
+        foreach ($attributes as $key => $attribute) {
+            if (is_string($attribute)) {
+                $attributes[$key] = trim($attribute);
+            }
+        }
+
         if ($this->type) {
             foreach (self::SHARED_FIELDS as $field) {
                 unset($attributes[$field]);
@@ -78,7 +84,7 @@ class ReportItem extends Model
             self::TYPE_FORWARD_RESEARCH => [],
         ];
 
-        $fields = [$type];
+        $fields = [$type, 'visibility'];
 
         foreach ($map[$type] as $field) {
             $fields[] = "{$type}_{$field}";
