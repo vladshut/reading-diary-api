@@ -34,8 +34,8 @@ class AuthorCreate extends FormRequest
             'bio' => 'string|max:500',
             'location' => 'required|string|max:200',
             'birth_date' => 'required|date|before:today',
-            'death_date' => 'required|date|after:birth_date',
-            'wikipedia_url' => 'url',
+            'death_date' => 'nullable|date|after:birth_date',
+            'wikipedia_url' => 'nullable|url',
         ];
     }
 
