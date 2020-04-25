@@ -13,6 +13,7 @@ set('repository', 'git@github.com:vladshut/reading-diary-api.git');
 set('git_tty', false);
 set('pry', false);
 set('ssh_multiplexing', false);
+set('keep_releases', 2);
 
 // Shared files/dirs between deploys
 add('shared_files', ['.env']);
