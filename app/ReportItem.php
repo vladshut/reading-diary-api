@@ -3,14 +3,20 @@
 namespace App;
 
 use Jenssegers\Mongodb\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia\HasMedia;
+use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
 use Webmozart\Assert\Assert;
 
 /**
- * @property mixed book_section_id
- * @property mixed type
+ * @property string book_section_id
+ * @property string type
+ * @property string id
+ * @property string _id
  */
-class ReportItem extends Model
+class ReportItem extends Model implements HasMedia
 {
+    use FilepondTrait, HasMediaTrait;
+
     public const TYPE_TERM = 'term';
     public const TYPE_GOAL = 'goal';
     public const TYPE_QUOTE = 'quote';
@@ -21,6 +27,7 @@ class ReportItem extends Model
     public const TYPE_REVIEW = 'review';
     public const TYPE_RATING = 'rating';
     public const TYPE_FORWARD_RESEARCH = 'forward_research';
+    public const TYPE_FIGURE = 'figure';
 
     public const TYPES = [
         self::TYPE_TERM,
@@ -33,6 +40,7 @@ class ReportItem extends Model
         self::TYPE_REVIEW,
         self::TYPE_RATING,
         self::TYPE_FORWARD_RESEARCH,
+        self::TYPE_FIGURE,
     ];
     private const SHARED_FIELDS = ['type', 'book_section_id', 'book_user_id'];
 
@@ -61,6 +69,14 @@ class ReportItem extends Model
             }
         }
 
+        foreach ($attributes as $key => $value) {
+            if (!is_string($value)) {
+                continue;
+            }
+
+            $attributes[$key] = preg_replace('/(?:(?:\r\n|\r|\n)\s*){2}/s', "\n\n", $value);
+        }
+
         /** @var self $self */
         $self = parent::fill($attributes);
 
@@ -75,21 +91,31 @@ class ReportItem extends Model
             self::TYPE_TERM => ['definition'],
             self::TYPE_GOAL => ['result', 'is_reached'],
             self::TYPE_QUOTE => ['note'],
-            self::TYPE_QUESTION => [],
-            self::TYPE_RESUME => [],
-            self::TYPE_REFERENCE => [],
-            self::TYPE_INFORMATION_EVALUATION => [],
-            self::TYPE_REVIEW => [],
-            self::TYPE_RATING => [],
-            self::TYPE_FORWARD_RESEARCH => [],
         ];
 
-        $fields = [$type, 'visibility'];
+        $fields = [$type, 'visibility', 'order', 'is_favourite'];
 
-        foreach ($map[$type] as $field) {
-            $fields[] = "{$type}_{$field}";
+        if (isset($map[$type])) {
+            foreach ($map[$type] as $field) {
+                $fields[] = "{$type}_{$field}";
+            }
         }
 
         return $withSharedFields ? array_merge(self::SHARED_FIELDS, $fields) : $fields;
+    }
+
+    public function filepondFields(): array
+    {
+        return [
+            ['field' => 'figure', 'type' => 'image', 'maxFileSize' => 1024 * 1024],
+        ];
+    }
+
+    public function media()
+    {
+        $media = $this->setConnection('mysql')->morphMany(config('medialibrary.media_model'), 'model');
+        $this->setConnection('mongodb');
+
+        return $media;
     }
 }

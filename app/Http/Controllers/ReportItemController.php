@@ -95,7 +95,7 @@ class ReportItemController extends Controller
      * @param BookSection $section
      * @return AnonymousResourceCollection
      */
-    public function saveBookSectionReport(Request $request, BookSection $section): AnonymousResourceCollection
+    public function saveBookSectionReport(Request $request, BookSection $section)
     {
         if (!$section->userBook()->first()->user()->first()->id === $this->getUser()->id) {
             throw new BadRequestHttpException();
@@ -111,7 +111,8 @@ class ReportItemController extends Controller
         $userBookId = $section->userBook()->get(['id'])->first()->id;
 
         foreach ($itemsToUpdate as $item) {
-            $reportItem = ReportItem::find($item['id']);
+            /** @var ReportItem $reportItem */
+            $reportItem = ReportItem::query()->find($item['id']);
 
             if ($reportItem) {
                 $reportItem->update($item);

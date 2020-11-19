@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
-use App\Author;
 use App\Book;
 use App\BookSection;
+use App\Filepond;
 use App\Http\Resources\ReportItemResource;
 use App\ReportItem;
 use App\UserBook;
+use Faker\Factory;
 use Illuminate\Http\Request;
-use Tests\DataStructures;
 use Tests\TestCase;
 
 class ReportItemTest extends TestCase
@@ -103,12 +103,26 @@ class ReportItemTest extends TestCase
         $reportItems = $this->createReportItems($userBook, $bookSection);
 
         foreach ($reportItems as $reportItem) {
-            $payload = [$reportItem->type => 'updated'];
+            $order = random_int(1, 100);
+
+            $rawValue = "updated \n\n   \n  \n now";
+            $expectedValue = "updated \n\nnow";
+            $faker = $faker = Factory::create();
+            $isFavourite = $faker->boolean();
+
+            $payload = [
+                $reportItem->type => $rawValue,
+                'order' => $order,
+                'is_favourite' => $isFavourite,
+            ];
+
             $data = $this->jsonApi('PUT', "books/my/sections/report-items/{$reportItem->id}", $payload);
 
             $this->assertStructure($data, array_keys((new ReportItemResource($reportItem))->toArray(new Request())));
 
             $criteria = $payload + ['id' => $reportItem->id];
+            $criteria[$reportItem->type] = $expectedValue;
+
             $this->assertDatabaseHas('report_items', $criteria, 'mongodb');
         }
     }

@@ -25,6 +25,7 @@ class BookSection extends Model
     protected $fillable = [
         'name',
         'order',
+        'parent_id',
     ];
 
     public function userBook(): BelongsTo

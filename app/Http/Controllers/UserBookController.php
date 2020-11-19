@@ -101,6 +101,14 @@ class UserBookController extends Controller
         return new UserBookResource($userBook);
     }
 
+    public function resumeReading(UserBook $userBook): UserBookResource
+    {
+        if ($this->getUser()->id === $userBook->user()->first('id')['id']) {
+            $userBook->resumeReading();
+        }
+
+        return new UserBookResource($userBook);
+    }
 
     /**
      * @param UserBook $userBook

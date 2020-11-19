@@ -3,6 +3,8 @@
 namespace Tests;
 
 use App\User;
+use Faker\Factory;
+use Faker\Generator;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Foundation\Exceptions\Handler;
@@ -17,6 +19,8 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication, DatabaseMigrations;
+
+    protected $faker;
 
     /**
      * Define hooks to migrate the database before and after each test.
@@ -43,6 +47,8 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
         $this->disableExceptionHandling();
         Artisan::call('db:seed');
+        $this->faker = Factory::create();
+
     }
 
     protected function disableExceptionHandling(): void

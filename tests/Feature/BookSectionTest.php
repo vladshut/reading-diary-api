@@ -62,9 +62,11 @@ class BookSectionTest extends TestCase
         $user = $this->login();
         $book = factory(Book::class)->create();
         $userBook = $user->addBook($book);
-        $section = $userBook->addSection('Chapter 1', 1, null);
+        $parentSection = $userBook->addSection('Chapter 1', 1, null);
+        $section = $userBook->addSection('Chapter 1.1', 1, null);
 
         $payload = factory(BookSection::class)->raw();
+        $payload['parent_id'] = $parentSection->id;
         unset($payload['book_user_id']);
 
         $responseData = $this->jsonApi('PUT', "books/my/sections/{$section->id}", $payload);
@@ -72,6 +74,7 @@ class BookSectionTest extends TestCase
         $this->assertStructure($responseData, DataStructures::SECTION);
 
         $criteria = $payload + ['book_user_id' => $userBook->id];
+
         $this->assertDatabaseHas('book_sections', $criteria);
     }
 

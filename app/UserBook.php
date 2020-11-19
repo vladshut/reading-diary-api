@@ -79,6 +79,18 @@ class UserBook extends Model
         $this->save();
     }
 
+    public function resumeReading(): void
+    {
+        if ($this->status !== self::STATUS_READ) {
+            return;
+        }
+
+        $this->status = self::STATUS_READING;
+        $this->end_reading_dt = null;
+
+        $this->save();
+    }
+
     public function sections(): HasMany
     {
         return $this->hasMany(BookSection::class, 'book_user_id');

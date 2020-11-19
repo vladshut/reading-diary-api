@@ -25,6 +25,7 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::get('books/my/{userBook}', 'UserBookController@show');
     Route::post('books/my/{userBook}/start-reading', 'UserBookController@startReading');
     Route::post('books/my/{userBook}/finish-reading', 'UserBookController@finishReading');
+    Route::post('books/my/{userBook}/resume-reading', 'UserBookController@resumeReading');
     Route::post('books/my/{userBook}/make-public', 'UserBookController@makePublic');
     Route::post('books/my/{userBook}/make-private', 'UserBookController@makePrivate');
     Route::get('books/my', 'UserBookController@myBooks');
