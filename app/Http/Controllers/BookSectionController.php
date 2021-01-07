@@ -23,15 +23,11 @@ class BookSectionController extends Controller
     {
         $this->validate($request, [
             'name' => 'required',
-            'parent_id' => 'required|numeric|gt:0',
+            'parent_id' => 'numeric|gt:0|exists:book_sections,id',
         ]);
 
         $name = (string)$request->input('name');
         $parentId = (int)$request->input('parent_id', null);
-
-        if (!BookSection::query()->where(['id' => $parentId])->exists()) {
-            throw new BadRequestHttpException();
-        }
 
         $order = (int)$userBook->sections()->where(['parent_id' => $parentId])->count() + 1;
 

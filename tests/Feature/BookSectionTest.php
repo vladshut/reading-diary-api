@@ -14,6 +14,9 @@ class BookSectionTest extends TestCase
 {
     public function testIndex(): void
     {
+//        dump(env('DB_CONNECTION'));
+//        dump(env('DB_DATABASE'));
+//        dump(config('database.default'));
         $sectionsCount = 5;
 
         $user = $this->login();
@@ -36,6 +39,7 @@ class BookSectionTest extends TestCase
 
         $payload = factory(BookSection::class)->raw();
         unset($payload['book_user_id']);
+        unset($payload['order']);
 
         $responseData = $this->jsonApi('POST', "books/my/{$userBook->id}/sections", $payload);
 
@@ -46,6 +50,7 @@ class BookSectionTest extends TestCase
 
         $payload = factory(BookSection::class)->raw();
         unset($payload['book_user_id']);
+        unset($payload['order']);
         $payload['parent_id'] = $responseData['id'];
 
         $responseData = $this->jsonApi('POST', "books/my/{$userBook->id}/sections", $payload);

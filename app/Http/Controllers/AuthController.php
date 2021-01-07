@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ValidationException;
+use App\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -27,7 +29,7 @@ class AuthController extends Controller
     {
         $credentials = request(['email', 'password']);
 
-        if (! $token = auth()->attempt($credentials)) {
+        if (!$token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -69,7 +71,7 @@ class AuthController extends Controller
     /**
      * Get the token array structure.
      *
-     * @param  string $token
+     * @param string $token
      *
      * @return JsonResponse
      */
@@ -80,5 +82,33 @@ class AuthController extends Controller
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60
         ]);
+    }
+
+    protected function changePassword(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = auth()->user();
+
+        $rules = [
+            'new_password' => 'required|password',
+            'confirm_password' => 'required|same:new_password',
+        ];
+
+        if ($user->password) {
+            $rules['old_password'] = 'required';
+        }
+
+        $this->validate($request, $rules);
+
+        $data = $request->all();
+
+        if ($user->password && !Hash::check($data['old_password'], $user->password)) {
+            throw new ValidationException(['old_password' => [__('You have entered wrong password.')]]);
+        }
+
+        $user->password = Hash::make($request->get('new_password'));
+        $user->save();
+
+        return new JsonResponse();
     }
 }

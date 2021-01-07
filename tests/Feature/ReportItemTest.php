@@ -25,7 +25,7 @@ class ReportItemTest extends TestCase
 
         $data = $this->jsonApi('GET', "books/my/sections/{$bookSection->id}/report-items");
 
-        $this->assertCount(count(ReportItem::TYPES), $data['data']);
+        self::assertCount(count(ReportItem::TYPES), $data);
     }
 
     public function createReportItems(UserBook $userBook, BookSection $bookSection): array
@@ -92,7 +92,6 @@ class ReportItemTest extends TestCase
         return $payload;
     }
 
-
     public function testUpdate(): void
     {
         $user = $this->login();
@@ -108,12 +107,12 @@ class ReportItemTest extends TestCase
             $rawValue = "updated \n\n   \n  \n now";
             $expectedValue = "updated \n\nnow";
             $faker = $faker = Factory::create();
-            $isFavourite = $faker->boolean();
+            $isFavorite = $faker->boolean();
 
             $payload = [
                 $reportItem->type => $rawValue,
                 'order' => $order,
-                'is_favourite' => $isFavourite,
+                'is_favorite' => $isFavorite,
             ];
 
             $data = $this->jsonApi('PUT', "books/my/sections/report-items/{$reportItem->id}", $payload);

@@ -7,7 +7,7 @@ use Exception;
 
 class ValidationException extends Exception
 {
-    protected array $messages = [];
+    protected $messages = [];
 
     /**
      * {@inheritdoc}

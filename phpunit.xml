@@ -26,8 +26,9 @@
         <extension class="Tests\Bootstrap"/>
     </extensions>
     <php>
-        <env name="DB_DATABASE" value="diary_test"/>
-        <env name="DB_MONGO_DATABASE" value="database_test"/>
+        <server name="DB_DATABASE" value=":memory:"/>
+        <server name="DB_CONNECTION" value="sqlite"/>
+        <server name="DB_MONGO_DATABASE" value="database_test"/>
         <server name="APP_ENV" value="testing"/>
         <server name="BCRYPT_ROUNDS" value="4"/>
         <server name="CACHE_DRIVER" value="array"/>

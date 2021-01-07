@@ -9,7 +9,7 @@ use App\ReportItem;
 use Spatie\MediaLibrary\Models\Media;
 use Tests\TestCase;
 
-class ReportItemTest extends TestCase
+class FigureReportItemTest extends TestCase
 {
     public function testUpdateFigureItem(): void
     {
@@ -31,7 +31,7 @@ class ReportItemTest extends TestCase
         $order = random_int(1, 100);
         $rawValue = uuid4()->toString();
         $expectedValue = __DIR__ . '/test.jpg';
-        $isFavourite = $this->faker->boolean;
+        $isFavorite = $this->faker->boolean;
 
         $filePath = __DIR__ . '/example.jpg';
         shell_exec("rm $expectedValue 2>&1");
@@ -40,7 +40,8 @@ class ReportItemTest extends TestCase
         $attributes = [
             $reportItem->type => $rawValue,
             'order' => $order,
-            'is_favourite' => $isFavourite,
+            'is_favorite' => $isFavorite,
+            'figure_caption' => 'New caption',
         ];
 
         $filepondMock = $this->mock(Filepond::class);
@@ -99,6 +100,7 @@ class ReportItemTest extends TestCase
         $data['book_section_id'] = $bookSection->id;
         $data['book_user_id'] = $userBook->id;
         $data['figure'] = $rawValue;
+        $data['figure_caption'] = 'New caption';
 
         $reportItem = new ReportItem($data);
         $reportItem->save();

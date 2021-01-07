@@ -73,7 +73,7 @@ class BookTest extends TestCase
         $this->assertDatabaseHas('book_user', $criteria);
         $userBookId = UserBook::query()->where($criteria)->get(['id'])->first()->id;
 
-        $criteria = ['book_user_id' => $userBookId, 'parent_id' => null, 'name' => 'Content', 'order' => 1];
+        $criteria = ['book_user_id' => $userBookId, 'parent_id' => null, 'name' => $payload['title'], 'order' => 1];
         $this->assertDatabaseHas('book_sections',$criteria);
     }
 
@@ -93,7 +93,7 @@ class BookTest extends TestCase
         $this->assertDatabaseHas('book_user', $criteria);
         $userBookId = UserBook::query()->where($criteria)->get(['id'])->first()->id;
 
-        $criteria = ['book_user_id' => $userBookId, 'parent_id' => null, 'name' => 'Content', 'order' => 1];
+        $criteria = ['book_user_id' => $userBookId, 'parent_id' => null, 'name' => $book->title, 'order' => 1];
         $this->assertDatabaseHas('book_sections',$criteria);
     }
 

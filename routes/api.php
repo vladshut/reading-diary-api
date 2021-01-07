@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,6 +13,8 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+Auth::routes(['verify' => true]);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
@@ -47,7 +50,7 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     Route::get('books/search', 'BookController@search');
 
-    Route::post('genres', 'GenreController@index');
+    Route::post('/auth/change-password', 'AuthController@changePassword');
 
     Route::resources([
         'authors' => 'AuthorController',
@@ -55,11 +58,8 @@ Route::group(['middleware' => ['auth:api']], function () {
     ]);
 });
 
-Route::group([
-    'middleware' => 'api',
-    'prefix' => 'auth'
 
-], static function ($router) {
+Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
     Route::post('login', 'AuthController@login');
     Route::post('logout', 'AuthController@logout');
     Route::post('refresh', 'AuthController@refresh');
@@ -69,3 +69,15 @@ Route::group([
     Route::get('login/socialite/{type}/callback', 'Auth\SocialiteController@handleProviderCallback');
 });
 
+Route::group(['prefix' => 'files'], function () {
+    Route::get('process', 'FilepondController@upload');
+    Route::post('process', 'FilepondController@upload');
+    Route::delete('process', 'FilepondController@delete');
+    Route::get('{model}/{id}/{mediaName}/{mediaId}/{fileName}', 'DownloadMediaController@download');
+    Route::get('', 'FilepondController@load');
+});
+
+Route::group(['prefix' => 'users'], function () {
+    Route::put('{user}', 'UserController@update');
+    Route::get('{user}/resend-verification', 'Auth\VerificationController@resend');
+});

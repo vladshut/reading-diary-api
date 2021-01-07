@@ -91,9 +91,10 @@ class ReportItem extends Model implements HasMedia
             self::TYPE_TERM => ['definition'],
             self::TYPE_GOAL => ['result', 'is_reached'],
             self::TYPE_QUOTE => ['note'],
+            self::TYPE_FIGURE => ['caption'],
         ];
 
-        $fields = [$type, 'visibility', 'order', 'is_favourite'];
+        $fields = [$type, 'visibility', 'order', 'is_favorite'];
 
         if (isset($map[$type])) {
             foreach ($map[$type] as $field) {
@@ -113,7 +114,7 @@ class ReportItem extends Model implements HasMedia
 
     public function media()
     {
-        $media = $this->setConnection('mysql')->morphMany(config('medialibrary.media_model'), 'model');
+        $media = $this->setConnection(config('database.default'))->morphMany(config('medialibrary.media_model'), 'model');
         $this->setConnection('mongodb');
 
         return $media;

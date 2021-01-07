@@ -20,8 +20,6 @@ class BookSection extends Model
 
     use HybridRelations;
 
-    protected $connection = 'mysql';
-
     protected $fillable = [
         'name',
         'order',

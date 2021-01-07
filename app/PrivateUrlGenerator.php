@@ -20,7 +20,7 @@ class PrivateUrlGenerator extends BaseUrlGenerator
         $mediaId = $media->id;
         $fileName = $media->file_name;
 
-        return "/files/$modelType/$modelId/$mediaName/$mediaId/$fileName";
+        return "/api/files/$modelType/$modelId/$mediaName/$mediaId/$fileName";
     }
 
     /**

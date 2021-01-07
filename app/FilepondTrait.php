@@ -42,11 +42,10 @@ trait FilepondTrait
                 $path = $filepond->findPathFromServerId($model->$filepondField);
 
                 if (!$path) {
-                    continue;
+                    return;
                 }
 
                 $validationField = $options['validationField'] ?? $filepondField;
-
 
                 $fileType = get_file_type($path);
 
@@ -55,7 +54,6 @@ trait FilepondTrait
                 if ($allowedType && $fileType !== $allowedType) {
                     throw new ValidationException([$validationField => trans('validation.invalid_file_type')]);
                 }
-
 
                 $fileSize = filesize($path);
                 $maxFileSize = $options['maxFileSize'] ?? (self::$maxFileSize[$allowedType] ?? null);

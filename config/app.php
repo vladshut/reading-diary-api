@@ -1,5 +1,7 @@
 <?php
 
+$webClientHost = env('WEB_CLIENT_HOST', 'localhost');
+
 return [
 
     /*
@@ -233,4 +235,10 @@ return [
         'Html' => Collective\Html\HtmlFacade::class,
     ],
 
+    'web_client' => [
+        'host' => $webClientHost,
+        'routes' => [
+            'verify_email_link' => "$webClientHost/verify-email?link={link}",
+        ],
+    ],
 ];

@@ -26,7 +26,7 @@ class CreateBooksTable extends Migration
         });
 
         Schema::table('books', static function (Blueprint $table) {
-            $table->bigInteger('author_id')->unsigned()->index();
+            $table->bigInteger('author_id')->unsigned()->index()->nullable();
             $table->foreign('author_id')->references('id')->on('authors')->onDelete('cascade');
         });
     }

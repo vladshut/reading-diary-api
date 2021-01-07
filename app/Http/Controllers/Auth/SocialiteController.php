@@ -54,6 +54,6 @@ class SocialiteController extends Controller
 
         $token = JWTAuth::fromUser($existingUser);
 
-        return redirect(env('FRONTEND_APP_HOST') . '/login?token=' . $token);
+        return redirect(config('app.web_client.host') . '/login?token=' . $token);
     }
 }
