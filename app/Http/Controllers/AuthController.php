@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\ValidationException;
 use App\User;
+use App\ValueObjects\Email;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -17,7 +18,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register']]);
     }
 
     /**
@@ -25,7 +26,7 @@ class AuthController extends Controller
      *
      * @return JsonResponse
      */
-    public function login()
+    public function login(): JsonResponse
     {
         $credentials = request(['email', 'password']);
 
@@ -37,13 +38,37 @@ class AuthController extends Controller
     }
 
     /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function register(Request $request): JsonResponse
+    {
+        $this->validate($request, [
+            'email' => 'required|email',
+            'password' => 'required|password',
+        ]);
+
+        $data = $request->only(['email', 'password']);
+        $data['name'] = (new Email($data['email']))->getLocalPart();
+        $data['password'] = Hash::make($data['password']);
+
+        /** @var User $user */
+        $user = User::query()->create($data);
+
+        $token = auth()->login($user);
+
+        return $this->respondWithToken($token);
+    }
+
+    /**
      * Get the authenticated User.
      *
      * @return JsonResponse
      */
-    public function me()
+    public function me(): JsonResponse
     {
-        return response()->json(auth()->user());
+        return response()->json($this->getUser());
     }
 
     /**
@@ -51,7 +76,7 @@ class AuthController extends Controller
      *
      * @return JsonResponse
      */
-    public function logout()
+    public function logout(): JsonResponse
     {
         auth()->logout();
 
@@ -63,31 +88,14 @@ class AuthController extends Controller
      *
      * @return JsonResponse
      */
-    public function refresh()
+    public function refresh(): JsonResponse
     {
         return $this->respondWithToken(auth()->refresh());
     }
 
-    /**
-     * Get the token array structure.
-     *
-     * @param string $token
-     *
-     * @return JsonResponse
-     */
-    protected function respondWithToken($token)
+    public function changePassword(Request $request): JsonResponse
     {
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
-        ]);
-    }
-
-    protected function changePassword(Request $request): JsonResponse
-    {
-        /** @var User $user */
-        $user = auth()->user();
+        $user = $this->getUser();
 
         $rules = [
             'new_password' => 'required|password',
@@ -110,5 +118,21 @@ class AuthController extends Controller
         $user->save();
 
         return new JsonResponse();
+    }
+
+    /**
+     * Get the token array structure.
+     *
+     * @param string $token
+     *
+     * @return JsonResponse
+     */
+    protected function respondWithToken($token): JsonResponse
+    {
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * 60
+        ]);
     }
 }

@@ -30,9 +30,9 @@ class VerifyEmailTest extends TestCase
 
     public function testResendVerificationIfUserIsAlreadyVerifiedEndpoint(): void
     {
-        Notification::fake();
-
         $user = $this->login();
+
+        Notification::fake();
 
         $user->email_verified_at = new Carbon();
         $user->save();

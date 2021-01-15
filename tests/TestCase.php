@@ -3,26 +3,21 @@
 namespace Tests;
 
 use App\User;
-use Exception;
 use Faker\Factory;
 use Faker\Generator;
-use Illuminate\Contracts\Console\Kernel;
-use Illuminate\Contracts\Debug\ExceptionHandler;
-use Illuminate\Foundation\Exceptions\Handler;
 use Illuminate\Foundation\Testing\Assert as PHPUnit;
-use Illuminate\Foundation\Testing\Concerns\InteractsWithExceptionHandling;
-use Illuminate\Foundation\Testing\Constraints\HasInDatabase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\RefreshDatabaseState;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
+use Tests\Constraints\CountInDatabase;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication, DatabaseMigrations;
 
+    /** @var Generator */
     protected $faker;
 
 
@@ -247,11 +242,25 @@ abstract class TestCase extends BaseTestCase
 
         if (is_array_assoc($errorMessage)) {
             $errors = $errorMessage;
+        } else if (is_null($errorMessage)) {
+            $errors = null;
         } else {
             $errors = [$key => is_string($errorMessage) ? [$errorMessage] : $errorMessage];
         }
 
         return [$data, $errors];
+    }
+
+    protected function transformValidationRulesToInvalidDataSetsWithoutErrors(array $validData, array $rules, string $keyPrefix = ''): array
+    {
+        foreach ($rules as $key => $keyRules) {
+            foreach ($keyRules as $oldKey => $val) {
+                unset($keyRules[$oldKey]);
+                $keyRules[$val] = null;
+            }
+        }
+
+        return $this->transformValidationRulesToInvalidDataSets($validData, $rules, $keyPrefix);
     }
 
     protected function transformValidationRulesToInvalidDataSets(array $validData, array $rules, string $keyPrefix = ''): array
@@ -279,5 +288,22 @@ abstract class TestCase extends BaseTestCase
         }
 
         return $result;
+    }
+
+    /**
+     * Assert the count of table entries.
+     *
+     * @param  string  $table
+     * @param  int  $count
+     * @param  string|null  $connection
+     * @return $this
+     */
+    protected function assertDatabaseCount($table, int $count, $connection = null): self
+    {
+        self::assertThat(
+            $table, new CountInDatabase($this->getConnection($connection), $count)
+        );
+
+        return $this;
     }
 }

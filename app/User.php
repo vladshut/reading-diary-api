@@ -61,6 +61,10 @@ class User extends Authenticatable implements JWTSubject, HasMedia
                 $user->sendEmailVerificationNotification();
             }
         });
+
+        static::created(static function(User $user) {
+            $user->sendEmailVerificationNotification();
+        });
     }
 
     public function books(): HasMany
