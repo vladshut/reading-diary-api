@@ -86,9 +86,9 @@ class Book extends Model
         $epub     = $reader->load($file);
         $metadata = $epub->getMetadata();
 
-        $meta['title'] = self::fetchMetadataValue($metadata, 'title');
-        $meta['author'] = self::fetchMetadataValue($metadata, 'creator');
-        $meta['lang'] = self::fetchMetadataValue($metadata, 'language');
+        $meta['title'] = self::findMetadataValue($metadata, 'title');
+        $meta['author'] = self::findMetadataValue($metadata, 'creator');
+        $meta['lang'] = self::findMetadataValue($metadata, 'language');
 
         $meta['genres'] = [];
         if ($metadata->has('subject')) {
@@ -98,7 +98,7 @@ class Book extends Model
             }
         }
 
-        $meta['description'] = self::fetchMetadataValue($metadata, 'description');
+        $meta['description'] = self::findMetadataValue($metadata, 'description');
 
         $meta['year'] = null;
         if ($metadata->has('date')) {
@@ -150,7 +150,7 @@ class Book extends Model
         return $meta;
     }
 
-    private static function fetchMetadataValue(Metadata $metadata, string $key)
+    private static function findMetadataValue(Metadata $metadata, string $key)
     {
         if ($metadata->has($key)) {
             return $metadata->getValue($key);

@@ -2,8 +2,10 @@
 
 namespace App;
 
+use App\Notifications\ResetPasswordNotification;
 use App\Notifications\UserVerifyEmailNotification;
-use DateTime;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -17,8 +19,14 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @property string avatar
  * @property string avatar_original
  * @property int id
- * @property DateTime|null email_verified_at
+ * @property Carbon|null email_verified_at
  * @property string password
+ * @property string|null bio
+ * @property Carbon created_at
+ * @property string|null facebook_id
+ * @property string|null google_id
+ * @property int|null read_books_count
+ * @property Carbon updated_at
  */
 class User extends Authenticatable implements JWTSubject, HasMedia
 {
@@ -112,7 +120,7 @@ class User extends Authenticatable implements JWTSubject, HasMedia
      *
      * @return void
      */
-    public function sendEmailVerificationNotification()
+    public function sendEmailVerificationNotification(): void
     {
         $this->notify(new UserVerifyEmailNotification());
     }
@@ -121,8 +129,62 @@ class User extends Authenticatable implements JWTSubject, HasMedia
     {
         $arr = parent::toArray();
 
-        $arr['has_password'] = (bool)$this->password;
+        $arr['has_password'] = $this->hasPassword();
 
         return $arr;
+    }
+
+    public function hasPassword(): bool
+    {
+        return (bool)$this->password;
+    }
+
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
+    }
+
+    public function loadReadBooksCount(): self
+    {
+        $this->read_books_count = $this->books()->where('status', UserBook::STATUS_READ)->count();
+
+        return $this;
+    }
+
+    public function followers(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            self::class,
+            'follows',
+            'followee_id',
+            'follower_id'
+        );
+    }
+    public function followees(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            self::class,
+            'follows',
+            'follower_id',
+            'followee_id'
+        );
+    }
+
+    public function follow(User $followee): void
+    {
+        $this->followees()->syncWithoutDetaching([$followee->id]);
+        $this->save();
+    }
+
+    public function unfollow(User $followee): void
+    {
+        $this->followees()->detach($followee);
+        $this->save();
     }
 }

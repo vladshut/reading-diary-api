@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Exceptions\ValidationException;
 use App\User;
 use App\ValueObjects\Email;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -18,7 +21,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register', 'sendResetPasswordMail', 'resetPassword']]);
     }
 
     /**
@@ -46,7 +49,7 @@ class AuthController extends Controller
     {
         $this->validate($request, [
             'email' => 'required|email',
-            'password' => 'required|password',
+            'password' => 'required|app_password',
         ]);
 
         $data = $request->only(['email', 'password']);
@@ -98,7 +101,7 @@ class AuthController extends Controller
         $user = $this->getUser();
 
         $rules = [
-            'new_password' => 'required|password',
+            'new_password' => 'required|app_password',
             'confirm_password' => 'required|same:new_password',
         ];
 
@@ -114,8 +117,62 @@ class AuthController extends Controller
             throw new ValidationException(['old_password' => [__('You have entered wrong password.')]]);
         }
 
-        $user->password = Hash::make($request->get('new_password'));
-        $user->save();
+        $this->setUserPassword($user, $request->get('new_password'));
+
+        return new JsonResponse();
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ValidationException
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function sendResetPasswordMail(Request $request): JsonResponse
+    {
+        $validationRules = [
+            'email' => 'required|exists:users,email',
+        ];
+        $this->validate($request, $validationRules);
+
+        $credentials = $request->only('email');
+
+        $status = Password::sendResetLink($credentials);
+
+        $isSuccess = $status === Password::RESET_LINK_SENT;
+
+        if (!$isSuccess) {
+            throw new ValidationException(['email' => [__($status)]]);
+        }
+
+        return new JsonResponse();
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ValidationException
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $validationRules = [
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|app_password',
+        ];
+        $this->validate($request, $validationRules);
+
+        $credentials = $request->only('email', 'password', 'token');
+
+        $resetPasswordCallback = function ($user, $password) { $this->setUserPassword($user, $password); };
+        $status = Password::broker()->reset($credentials, $resetPasswordCallback);
+
+        $isSuccess = $status === Password::PASSWORD_RESET;
+
+        if (!$isSuccess) {
+            throw new ValidationException(['email' => [__($status)]]);
+        }
 
         return new JsonResponse();
     }
@@ -134,5 +191,23 @@ class AuthController extends Controller
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60
         ]);
+    }
+
+    /**
+     * Reset the given user's password.
+     *
+     * @param  User  $user
+     * @param  string  $password
+     * @return void
+     */
+    protected function setUserPassword(User $user, string $password): void
+    {
+        $user->password = Hash::make($password);
+
+        $user->setRememberToken(Str::random(60));
+
+        $user->save();
+
+        event(new PasswordReset($user));
     }
 }

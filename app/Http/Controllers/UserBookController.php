@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Book;
 use App\Http\Resources\UserBookResource;
+use App\User;
 use App\UserBook;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -136,5 +138,54 @@ class UserBookController extends Controller
         }
 
         return new UserBookResource($userBook);
+    }
+
+    /**
+     * @param User $user
+     * @return array
+     */
+    public function topLanguages(User $user): array
+    {
+        return UserBook::query()
+            ->select('lang', DB::raw('count(*) as count'))
+            ->where('user_id', '=', $user->id)
+            ->join('books', 'books.id', '=', 'book_user.book_id')
+            ->groupBy(['lang'])
+            ->orderByDesc('count')
+            ->get()
+            ->toArray();
+    }
+
+    /**
+     * @param User $user
+     * @return array
+     */
+    public function topAuthors(User $user): array
+    {
+        return UserBook::query()
+            ->select('authors.name', DB::raw('count(*) as count'))
+            ->where('user_id', '=', $user->id)
+            ->join('books', 'books.id', '=', 'book_user.book_id')
+            ->join('authors', 'authors.id', '=', 'books.author_id')
+            ->groupBy(['authors.id'])
+            ->orderByDesc('count')
+            ->get()
+            ->toArray();
+    }
+
+    /**
+     * @param User $user
+     * @return array
+     */
+    public function topStatuses(User $user): array
+    {
+        return UserBook::query()
+            ->select('status', DB::raw('count(*) as count'))
+            ->where('user_id', '=', $user->id)
+            ->join('books', 'books.id', '=', 'book_user.book_id')
+            ->groupBy(['status'])
+            ->orderByDesc('count')
+            ->get()
+            ->toArray();
     }
 }

@@ -137,7 +137,7 @@ return [
     \App\Rules\CountryCode::getAlias() => 'This field must be alpha2 country code.',
     \App\Rules\PhoneE164::getAlias() => 'Phone should be in E.164 format.',
     \App\Rules\LocaleIcu::getAlias() => 'Locale should be in ICU format.',
-    \App\Rules\Password::getAlias() => 'The :attribute must be 8–30 characters, and include a number, a symbol, a lower and a upper case letter.',
+    \App\Rules\Password::getAlias() => 'The :attribute must be 8-30 characters, and include a number, a symbol, a lower and a upper case letter.',
     \App\Rules\DateUtc::getAlias() => 'Date should be in UTC format.',
     \App\Rules\Missing::getAlias() => 'This field is not allowed! :reason',
     \App\Rules\Equals::getAlias() => 'The field should be equal to \':expected\'.',

@@ -8,7 +8,7 @@ class Password extends BaseRule
 {
     public static function getAlias(): string
     {
-        return 'password';
+        return 'app_password';
     }
 
     public function passes($attribute, $value, $parameters = [], $validator = null): bool

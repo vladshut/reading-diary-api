@@ -5,10 +5,11 @@ namespace Tests\Feature;
 use App\Book;
 use App\Author;
 use App\UserBook;
+use JsonException;
 use Tests\DataStructures;
 use Tests\TestCase;
 
-class BookTest extends TestCase
+class UserBookTest extends TestCase
 {
     public function testShow(): void
     {
@@ -29,7 +30,7 @@ class BookTest extends TestCase
 
         $data = $this->jsonApi('GET', 'books');
 
-        $this->assertStructure($data, ['data' =>  ['*' => DataStructures::BOOK]]);
+        $this->assertStructure($data, ['data' => ['*' => DataStructures::BOOK]]);
         $this->assertCount($booksCount, $data['data']);
     }
 
@@ -45,7 +46,7 @@ class BookTest extends TestCase
 
         $data = $this->jsonApi('GET', 'books/my');
 
-        $this->assertStructure($data, ['data' =>  ['*' => DataStructures::USER_BOOK]]);
+        $this->assertStructure($data, ['data' => ['*' => DataStructures::USER_BOOK]]);
         $this->assertCount($booksCount, $data['data']);
     }
 
@@ -74,7 +75,7 @@ class BookTest extends TestCase
         $userBookId = UserBook::query()->where($criteria)->get(['id'])->first()->id;
 
         $criteria = ['book_user_id' => $userBookId, 'parent_id' => null, 'name' => $payload['title'], 'order' => 1];
-        $this->assertDatabaseHas('book_sections',$criteria);
+        $this->assertDatabaseHas('book_sections', $criteria);
     }
 
     public function testAddExisting(): void
@@ -94,7 +95,7 @@ class BookTest extends TestCase
         $userBookId = UserBook::query()->where($criteria)->get(['id'])->first()->id;
 
         $criteria = ['book_user_id' => $userBookId, 'parent_id' => null, 'name' => $book->title, 'order' => 1];
-        $this->assertDatabaseHas('book_sections',$criteria);
+        $this->assertDatabaseHas('book_sections', $criteria);
     }
 
 
@@ -141,6 +142,7 @@ class BookTest extends TestCase
      * @dataProvider searchDataProvider
      * @param string $term
      * @param array $titlesOfResults
+     * @throws JsonException
      */
     public function testSearch(string $term, array $titlesOfResults): void
     {
@@ -178,7 +180,7 @@ class BookTest extends TestCase
 
         $data = $this->jsonApi('GET', "books/search?term={$term}");
 
-        $this->assertStructure($data, ['data' =>  ['*' => DataStructures::BOOK]]);
+        $this->assertStructure($data, ['data' => ['*' => DataStructures::BOOK]]);
         $this->assertCount($expectedCount, $data['data']);
         $actualTitles = array_column($data['data'], 'title');
         $this->assertEquals($titlesOfResults, $actualTitles, json_encode($actualTitles));
@@ -187,11 +189,118 @@ class BookTest extends TestCase
     public function searchDataProvider(): array
     {
         return [
-            ['joHn',  ['Smith & Johnathan', 'Johnny Horror']],
-            ['9781',  ['Face Down', 'Alice Bob']],
+            ['joHn', ['Smith & Johnathan', 'Johnny Horror']],
+            ['9781', ['Face Down', 'Alice Bob']],
             ['97814', ['Alice Bob']],
             ['28946', ['Alice Bob']],
-            ['2717',  ['Smith & Johnathan']],
+            ['2717', ['Smith & Johnathan']],
         ];
+    }
+
+    public function testTopLanguages(): void
+    {
+        $user = $this->createUser();
+
+        $booksLanguages = ['ukr' => 7, 'eng' => 6, 'tur' => 5, 'aze' => 4, 'arc' => 3, 'rus' => 1];
+
+        foreach ($booksLanguages as $booksLanguage => $booksCount) {
+            for ($i = 0; $i < $booksCount; $i++) {
+                $book = factory(Book::class)->create(['lang' => $booksLanguage]);
+                $user->addBook($book);
+            }
+        }
+
+        // add books to another user
+        $otherUser = $this->login();
+        $book = factory(Book::class)->create(['lang' => 'ukr']);
+        $otherUser->addBook($book);
+
+        $data = $this->jsonApi('GET', "users/{$user->id}/books/top-languages");
+
+        $expectedData = [];
+
+        foreach ($booksLanguages as $lang => $count) {
+            $expectedData[] = ['lang' => $lang, 'count' => $count];
+        }
+
+        self::assertEquals($expectedData, $data);
+    }
+
+    public function testTopAuthors(): void
+    {
+        $this->withoutExceptionHandling();
+        $user = $this->createUser();
+
+        $booksAuthors = [
+            'Author One' => 7,
+            'Author Two' => 6,
+            'Author Three' => 5,
+            'Author Four' => 4,
+            'Author Five' => 3,
+            'Author Six' => 1
+        ];
+
+        foreach ($booksAuthors as $authorName => $authorCount) {
+            $author = factory(Author::class)->create(['name' => $authorName]);
+
+            for ($i = 0; $i < $authorCount; $i++) {
+                $book = factory(Book::class)->create(['author_id' => $author->id]);
+                $user->addBook($book);
+            }
+        }
+
+        // add books to another user
+        $otherUser = $this->login();
+        $author = factory(Author::class)->create(['name' => 'Author One']);
+        $book = factory(Book::class)->create(['author_id' => $author->id]);
+        $otherUser->addBook($book);
+
+        $data = $this->jsonApi('GET', "users/{$user->id}/books/top-authors");
+
+        $expectedData = [];
+
+        foreach ($booksAuthors as $name => $count) {
+            $expectedData[] = ['name' => $name, 'count' => $count];
+        }
+
+        self::assertEquals($expectedData, $data);
+    }
+
+    public function testTopStatuses(): void
+    {
+        $this->withoutExceptionHandling();
+        $user = $this->createUser();
+
+        $booksStatuses = [
+            UserBook::STATUS_NOT_READ => 4,
+            UserBook::STATUS_READING => 3,
+            UserBook::STATUS_READ => 2,
+            UserBook::STATUS_CANCELED => 1,
+        ];
+
+        foreach ($booksStatuses as $bookStatus => $statusCount) {
+            for ($i = 0; $i < $statusCount; $i++) {
+                $book = factory(Book::class)->create();
+                $userBook = $user->addBook($book);
+                $userBook->status = $bookStatus;
+                $userBook->save();
+            }
+        }
+
+        // add books to another user
+        $otherUser = $this->login();
+        $book = factory(Book::class)->create();
+        $userBook = $otherUser->addBook($book);
+        $userBook->status = $bookStatus;
+
+        $data = $this->jsonApi('GET', "users/{$user->id}/books/top-statuses");
+
+        $expectedData = [];
+
+        foreach ($booksStatuses as $status => $count) {
+            $expectedData[] = ['status' => $status, 'count' => $count];
+        }
+
+        self::assertEquals($expectedData, $data);
     }
 }

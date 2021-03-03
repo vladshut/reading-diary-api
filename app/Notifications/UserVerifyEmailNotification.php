@@ -29,6 +29,6 @@ final class UserVerifyEmailNotification extends VerifyEmail
             ]
         );
 
-        return str_replace('{link}', urlencode($serverLink), config('app.web_client.routes.verify_email_link'));
+        return str_replace('{link}', urlencode($serverLink), config('app.web_client.routes.verify_email'));
     }
 }

@@ -179,6 +179,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         Laravel\Socialite\SocialiteServiceProvider::class,
         Jenssegers\Mongodb\MongodbServiceProvider::class,
+        Barryvdh\Cors\ServiceProvider::class,
 
     ],
 
@@ -238,7 +239,8 @@ return [
     'web_client' => [
         'host' => $webClientHost,
         'routes' => [
-            'verify_email_link' => "$webClientHost/verify-email?link={link}",
+            'verify_email' => "$webClientHost/verify-email?link={link}",
+            'reset_password' => "$webClientHost/reset-password?token={token}&email={email}",
         ],
     ],
 ];

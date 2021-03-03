@@ -29,13 +29,19 @@ abstract class TestCase extends BaseTestCase
          */
         parent::setUp();
         Artisan::call('db:seed');
-        $this->faker = Factory::create();
+        $this->initFaker();
+    }
 
+    protected function initFaker(): void
+    {
+        if (!$this->faker) {
+            $this->faker = Factory::create();
+        }
     }
 
     protected function login(User $user = null): User
     {
-        $user = $user ?: factory(User::class)->create();
+        $user = $user ?: $this->createUser();
         $this->actingAs($user, 'api');
         $this->actingAs($user, 'web');
 
@@ -44,6 +50,11 @@ abstract class TestCase extends BaseTestCase
         $this->withHeader('Authorization', "Bearer $token");
 
         return $user;
+    }
+
+    protected function createUser(array $attributes = []): User
+    {
+        return factory(User::class)->create($attributes);
     }
 
     protected function jsonApi($method, $uri, array $data = [], array $headers = []): array
@@ -305,5 +316,30 @@ abstract class TestCase extends BaseTestCase
         );
 
         return $this;
+    }
+
+    protected static function assertArrayHasArrayWithSubset(array $arr, array $subset): void
+    {
+        $result = Arr::first($arr, static function ($item) use ($subset) {
+            return !array_diff($subset, $item);
+        });
+
+        $arrStr = json_encode($arr, JSON_THROW_ON_ERROR);
+        $subsetStr = json_encode($subset, JSON_THROW_ON_ERROR);
+        $message = "Array {$arrStr} does not have an array with the subset {$subsetStr}";
+        self::assertNotNull($result, $message);
+    }
+
+    protected function userToResource(User $user): array
+    {
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'avatar' => $user->avatar,
+            'email' => $user->email,
+            'created_at' => $user->created_at->__toString(),
+            'followers_count' => $user->followers()->count(),
+            'followees_count' => $user->followees()->count(),
+        ];
     }
 }
