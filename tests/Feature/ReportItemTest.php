@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
-use App\Book;
-use App\BookSection;
-use App\Filepond;
+use App\Models\Book;
+use App\Models\BookSection;
+use App\Services\Filepond;
 use App\Http\Resources\ReportItemResource;
-use App\ReportItem;
-use App\UserBook;
+use App\Models\ReportItem;
+use App\Models\UserBook;
 use Faker\Factory;
 use Illuminate\Http\Request;
 use Tests\TestCase;

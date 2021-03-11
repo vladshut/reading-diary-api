@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Services;
 
 use App\Exceptions\InvalidPathException;
 use Illuminate\Support\Facades\Crypt;

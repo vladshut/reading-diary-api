@@ -4,9 +4,9 @@
 
 use Faker\Generator as Faker;
 use Illuminate\Database\Eloquent\Factory;
-use App\Author;
+use App\Models\Author;
 
-$factory->define(\App\Book::class, static function (Faker $faker) {
+$factory->define(\App\Models\Book::class, static function (Faker $faker) {
     return [
         'title' => $faker->sentence(),
         'year' => $faker->year(date('Y')),

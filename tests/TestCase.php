@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-use App\User;
+use App\Models\User;
 use Faker\Factory;
 use Faker\Generator;
 use Illuminate\Foundation\Testing\Assert as PHPUnit;

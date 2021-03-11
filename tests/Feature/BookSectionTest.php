@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Author;
-use App\Book;
-use App\BookSection;
-use App\ReportItem;
-use App\UserBook;
+use App\Models\Author;
+use App\Models\Book;
+use App\Models\BookSection;
+use App\Models\ReportItem;
+use App\Models\UserBook;
 use Tests\DataStructures;
 use Tests\TestCase;
 

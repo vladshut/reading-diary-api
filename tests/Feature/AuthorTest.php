@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Author;
-use App\Book;
+use App\Models\Author;
+use App\Models\Book;
 use Tests\TestCase;
 
 class AuthorTest extends TestCase

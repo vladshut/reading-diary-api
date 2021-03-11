@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\BookSectionResource;
 use App\Http\Resources\UserBookResource;
-use App\UserBook;
+use App\Models\UserBook;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class PublicUserBookController extends Controller

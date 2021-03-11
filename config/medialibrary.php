@@ -74,7 +74,7 @@ return [
      * When urls to files get generated, this class will be called. Leave empty
      * if your files are stored locally above the site root or on s3.
      */
-    'url_generator' => \App\PrivateUrlGenerator::class,
+    'url_generator' => \App\Services\PrivateUrlGenerator::class,
 
     /*
      * Whether to activate versioning when urls to files get generated.

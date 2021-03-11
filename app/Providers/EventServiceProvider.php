@@ -5,7 +5,11 @@ namespace App\Providers;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
+use App\Events\ReportPublished;
+use App\Listeners\CreateReportPublishedFeed;
+use App\Events\ReportUnpublished;
+use App\Events\FeedCreated;
+use App\Listeners\DeleteReportPublishedFeed;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -17,6 +21,12 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+        ReportPublished::class => [
+            CreateReportPublishedFeed::class
+        ],
+        ReportUnpublished::class => [
+            DeleteReportPublishedFeed::class
         ],
     ];
 

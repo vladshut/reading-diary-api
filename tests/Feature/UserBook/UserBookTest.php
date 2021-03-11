@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Book;
-use App\Author;
-use App\UserBook;
+use App\Models\Book;
+use App\Models\Author;
+use App\Models\UserBook;
 use JsonException;
 use Tests\DataStructures;
 use Tests\TestCase;

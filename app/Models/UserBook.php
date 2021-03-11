@@ -1,8 +1,14 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
+use App\Events\ReportPublished;
+use App\Events\ReportUnpublished;
+use App\Models\Book;
+use App\Models\BookSection;
+use App\Models\User;
 use DateTime;
+use DateTimeImmutable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,6 +22,9 @@ use Ramsey\Uuid\UuidInterface;
  * @property DateTime end_reading_dt
  * @property mixed id
  * @property UuidInterface report_public_key
+ * @property bool is_report_published
+ * @property DateTime $report_published_at
+ * @property string user_id
  */
 class UserBook extends Model
 {
@@ -29,6 +38,17 @@ class UserBook extends Model
     protected $attributes = [
         'status' => self::STATUS_NOT_READ,
     ];
+
+    protected $dispatchesEvents = [
+        'report_published' => ReportPublished::class,
+        'report_unpublished' => ReportUnpublished::class,
+    ];
+
+    protected $casts = [
+        'is_report_published' => 'boolean',
+    ];
+
+    protected $dates = ['report_published_at'];
 
     public static function getStatuses(): array
     {
@@ -167,5 +187,30 @@ class UserBook extends Model
     {
         $this->report_public_key = Uuid::uuid4();
         $this->save();
+    }
+
+    public function publishReport(): void
+    {
+        if (!$this->isReportPublished()) {
+            $this->is_report_published = true;
+            $this->report_published_at = new DateTimeImmutable();
+            $this->save();
+            $this->fireModelEvent('report_published');
+        }
+    }
+
+    public function unpublishReport(): void
+    {
+        if ($this->isReportPublished()) {
+            $this->is_report_published = false;
+            $this->report_published_at = null;
+            $this->save();
+            $this->fireModelEvent('report_unpublished');
+        }
+    }
+
+    public function isReportPublished(): bool
+    {
+        return (bool)$this->is_report_published;
     }
 }

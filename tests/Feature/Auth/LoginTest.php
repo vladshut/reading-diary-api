@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Notifications\UserVerifyEmailNotification;
-use App\User;
+use App\Models\User;
 use App\ValueObjects\Email;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;

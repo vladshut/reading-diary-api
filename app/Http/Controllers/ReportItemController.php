@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\BookSection;
+use App\Models\BookSection;
 use App\Http\Resources\ReportItemResource;
-use App\ReportItem;
+use App\Models\ReportItem;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

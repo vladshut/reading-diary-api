@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Filepond;
+use App\Services\Filepond;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Response;

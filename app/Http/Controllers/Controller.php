@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\User;
+use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -24,5 +24,14 @@ class Controller extends BaseController
     protected function empty(): JsonResponse
     {
         return new JsonResponse([], 201);
+    }
+
+    protected function abortIfNotUser($userId): void
+    {
+        if ($userId instanceof User) {
+            $userId = $userId->id;
+        }
+
+        abort_if($userId != $this->getUser()->id, 403);
     }
 }

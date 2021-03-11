@@ -2,10 +2,10 @@
 
 namespace Tests\Unit;
 
-use App\Book;
-use App\BookSection;
-use App\Filepond;
-use App\ReportItem;
+use App\Models\Book;
+use App\Models\BookSection;
+use App\Services\Filepond;
+use App\Models\ReportItem;
 use Spatie\MediaLibrary\Models\Media;
 use Tests\TestCase;
 

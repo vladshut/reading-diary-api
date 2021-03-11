@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ValidationException;
-use App\User;
+use App\Models\User;
 use App\ValueObjects\Email;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\JsonResponse;

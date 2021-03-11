@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Book;
+use App\Models\Book;
 use App\Http\Resources\UserBookResource;
-use App\User;
-use App\UserBook;
+use App\Models\User;
+use App\Models\UserBook;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
@@ -187,5 +188,23 @@ class UserBookController extends Controller
             ->orderByDesc('count')
             ->get()
             ->toArray();
+    }
+
+    public function publishReport(UserBook $userBook): JsonResponse
+    {
+        $this->abortIfNotUser($userBook->user_id);
+
+        $userBook->publishReport();
+
+        return $this->empty();
+    }
+
+    public function unpublishReport(UserBook $userBook): JsonResponse
+    {
+        $this->abortIfNotUser($userBook->user_id);
+
+        $userBook->unpublishReport();
+
+        return $this->empty();
     }
 }

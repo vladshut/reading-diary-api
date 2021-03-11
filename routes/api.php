@@ -33,8 +33,8 @@ Route::group(['middleware' => ['auth:api']], static function () {
     Route::post('books/my/{userBook}/make-public', 'UserBookController@makePublic');
     Route::post('books/my/{userBook}/make-private', 'UserBookController@makePrivate');
     Route::get('books/my', 'UserBookController@myBooks');
-    Route::post('books/add-new', 'UserBookController@addNew');
-    Route::post('books/add-existing', 'UserBookController@addExisting');
+    Route::post('books/my/{userBook}/publish-report', 'UserBookController@publishReport');
+    Route::post('books/my/{userBook}/unpublish-report', 'UserBookController@unpublishReport');
 
     Route::get('books/my/{userBook}/sections', 'BookSectionController@index');
     Route::post('books/my/{userBook}/sections', 'BookSectionController@store');
@@ -46,6 +46,9 @@ Route::group(['middleware' => ['auth:api']], static function () {
     Route::get('books/my/sections/{section}/report-items', 'ReportItemController@index');
     Route::put('books/my/sections/report-items/{reportItem}', 'ReportItemController@update');
     Route::delete('books/my/sections/report-items/{reportItem}', 'ReportItemController@destroy');
+
+    Route::post('books/add-new', 'UserBookController@addNew');
+    Route::post('books/add-existing', 'UserBookController@addExisting');
 
     Route::get('authors/search', 'AuthorController@search');
 

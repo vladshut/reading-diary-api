@@ -5,7 +5,7 @@
 use Faker\Generator as Faker;
 use Illuminate\Database\Eloquent\Factory;
 
-$factory->define(\App\Author::class, static function (Faker $faker) {
+$factory->define(\App\Models\Author::class, static function (Faker $faker) {
     $deathDate = $faker->date('Y-m-d', '2010-01-01');
 
     return [

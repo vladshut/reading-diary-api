@@ -2,10 +2,11 @@
 declare(strict_types=1);
 
 
-namespace App;
+namespace App\Models;
 
 
 use App\Exceptions\ValidationException;
+use App\Services\Filepond;
 use Spatie\MediaLibrary\HasMedia\HasMedia;
 use Spatie\MediaLibrary\Models\Media;
 

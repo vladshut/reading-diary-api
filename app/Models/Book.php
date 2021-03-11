@@ -1,7 +1,9 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
+use App\Models\Genre;
+use App\Models\Author;
 use DateTime;
 use ePub\Definition\ManifestItem;
 use ePub\Definition\Metadata;
@@ -13,7 +15,6 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -21,6 +22,8 @@ use Illuminate\Support\Facades\Storage;
 /**
  * @property mixed id
  * @property mixed author
+ * @property string title
+ * @property string description
  * @method static paginate()
  * @method static create(array $all)
  */

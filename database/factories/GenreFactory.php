@@ -2,8 +2,8 @@
 
 /** @var Factory $factory */
 
-use App\Genre;
-use App\User;
+use App\Models\Genre;
+use App\Models\User;
 use Faker\Generator as Faker;
 use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Support\Str;

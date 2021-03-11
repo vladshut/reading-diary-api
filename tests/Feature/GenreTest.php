@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Author;
-use App\Book;
-use App\Genre;
+use App\Models\Author;
+use App\Models\Book;
+use App\Models\Genre;
 use Tests\TestCase;
 
 class GenreTest extends TestCase

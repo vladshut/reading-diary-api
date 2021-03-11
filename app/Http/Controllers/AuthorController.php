@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Author;
+use App\Models\Author;
 use App\Http\Requests\AuthorCreate;
 use App\Http\Resources\AuthorResource;
 use Illuminate\Http\Request;

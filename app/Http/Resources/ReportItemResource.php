@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use App\ReportItem;
+use App\Models\ReportItem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;

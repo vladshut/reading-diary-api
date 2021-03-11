@@ -2,9 +2,9 @@
 
 /** @var Factory $factory */
 
-use App\BookSection;
-use App\User;
-use App\Book;
+use App\Models\BookSection;
+use App\Models\User;
+use App\Models\Book;
 use Faker\Generator as Faker;
 use Illuminate\Database\Eloquent\Factory;
 

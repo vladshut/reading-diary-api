@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Filepond;
+use App\Services\Filepond;
 use App\Notifications\UserVerifyEmailNotification;
-use App\User;
+use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Notification;
 use Spatie\MediaLibrary\Models\Media;

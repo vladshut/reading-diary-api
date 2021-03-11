@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Book;
+use App\Models\Book;
 use App\Http\Resources\UserBookResource;
 use App\Http\Resources\UserResource;
-use App\User;
-use App\UserBook;
+use App\Models\User;
+use App\Models\UserBook;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\JsonResponse;

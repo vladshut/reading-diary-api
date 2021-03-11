@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\BookSection;
+use App\Models\BookSection;
 use App\Http\Resources\BookSectionResource;
-use App\UserBook;
+use App\Models\UserBook;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
