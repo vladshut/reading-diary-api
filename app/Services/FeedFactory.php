@@ -22,7 +22,7 @@ class FeedFactory
         $user = $userBook->user()->firstOrFail();
 
         /** @var Book $book */
-        $book = $userBook->book()->firstOrFail();
+        $book = $userBook->book()->with('author')->firstOrFail();
 
         $resume = $userBook->getRootSection()->reportItems()->where('type', ReportItem::TYPE_RESUME)->first();
         $resume = $resume ? $resume->resume : null;
@@ -44,6 +44,7 @@ class FeedFactory
             'resume' => $resume,
             'rating' => $rating,
             'book_description' => $book->description,
+            'book_author_name' => $book->author->name,
         ];
 
         return $feed;

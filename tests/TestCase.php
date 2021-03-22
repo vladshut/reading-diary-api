@@ -321,7 +321,9 @@ abstract class TestCase extends BaseTestCase
     protected static function assertArrayHasArrayWithSubset(array $arr, array $subset): void
     {
         $result = Arr::first($arr, static function ($item) use ($subset) {
-            return !array_diff($subset, $item);
+            $subsetFlatten = Arr::flatten($subset);
+            $itemFlatten = Arr::flatten($item);
+            return !array_diff($subsetFlatten, $itemFlatten);
         });
 
         $arrStr = json_encode($arr, JSON_THROW_ON_ERROR);

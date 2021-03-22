@@ -26,7 +26,7 @@ Route::get('public-report/{publicKey}', 'PublicUserBookController@show');
 Route::get('public-report/{publicKey}/sections', 'PublicUserBookController@sections');
 
 Route::group(['middleware' => ['auth:api']], static function () {
-    Route::get('books/my/{userBook}', 'UserBookController@show');
+
     Route::post('books/my/{userBook}/start-reading', 'UserBookController@startReading');
     Route::post('books/my/{userBook}/finish-reading', 'UserBookController@finishReading');
     Route::post('books/my/{userBook}/resume-reading', 'UserBookController@resumeReading');
@@ -50,6 +50,8 @@ Route::group(['middleware' => ['auth:api']], static function () {
     Route::post('books/add-new', 'UserBookController@addNew');
     Route::post('books/add-existing', 'UserBookController@addExisting');
 
+    Route::get('books/user/{userBook}', 'UserBookController@show');
+
     Route::get('authors/search', 'AuthorController@search');
 
     Route::get('books/search', 'BookController@search');
@@ -67,6 +69,8 @@ Route::group(['middleware' => ['auth:api']], static function () {
     Route::get('users/{user}/books/top-languages', 'UserBookController@topLanguages');
     Route::get('users/{user}/books/top-authors', 'UserBookController@topAuthors');
     Route::get('users/{user}/books/top-statuses', 'UserBookController@topStatuses');
+
+    Route::get('feeds', 'FeedController@index');
 
     Route::resources([
         'authors' => 'AuthorController',

@@ -30,6 +30,8 @@ class Feed extends Model
 
     protected $casts = ['data' => 'array'];
 
+    protected $dates = ['date'];
+
     public const TYPE_REPORT_PUBLISHED = 'report_published';
 
     protected $dispatchesEvents = [

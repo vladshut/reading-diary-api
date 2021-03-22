@@ -70,6 +70,7 @@ final class FeedFactoryTest extends TestCase
                 'resume' => $resume->resume,
                 'rating' => $rating->rating,
                 'book_description' => $book->description,
+                'book_author_name' => $book->author->name,
             ],
         ];
 

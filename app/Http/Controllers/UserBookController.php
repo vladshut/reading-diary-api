@@ -32,7 +32,10 @@ class UserBookController extends Controller
      */
     public function show(UserBook $userBook): UserBookResource
     {
-        if ($this->getUser()->id !== $userBook->user()->first('id')['id']) {
+        $isPublished = $userBook->isReportPublished();
+        $isOwner = $this->getUser()->id === $userBook->user()->first('id')['id'];
+
+        if (!$isOwner && !$isPublished) {
             throw new BadRequestHttpException();
         }
 
@@ -190,21 +193,21 @@ class UserBookController extends Controller
             ->toArray();
     }
 
-    public function publishReport(UserBook $userBook): JsonResponse
+    public function publishReport(UserBook $userBook): UserBookResource
     {
         $this->abortIfNotUser($userBook->user_id);
 
         $userBook->publishReport();
 
-        return $this->empty();
+        return new UserBookResource($userBook);
     }
 
-    public function unpublishReport(UserBook $userBook): JsonResponse
+    public function unpublishReport(UserBook $userBook): UserBookResource
     {
         $this->abortIfNotUser($userBook->user_id);
 
         $userBook->unpublishReport();
 
-        return $this->empty();
+        return new UserBookResource($userBook);
     }
 }

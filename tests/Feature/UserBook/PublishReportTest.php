@@ -18,7 +18,7 @@ class PublishReportTest extends TestCase
         $book = factory(Book::class)->create();
         $userBook = $user->addBook($book);
 
-        self::assertUserBookReportNotUnpublished($userBook);
+        self::assertUserBookReportNotPublished($userBook);
 
         $this->jsonApiPost("books/my/{$userBook->id}/publish-report");
 
@@ -37,7 +37,7 @@ class PublishReportTest extends TestCase
         $book = factory(Book::class)->create();
         $userBook = $user->addBook($book);
 
-        self::assertUserBookReportNotUnpublished($userBook);
+        self::assertUserBookReportNotPublished($userBook);
 
         $response = $this->json('POST',"api/books/my/{$userBook->id}/publish-report");
         $response->assertStatus(403);
