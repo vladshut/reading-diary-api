@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Builders\FeedBuilder;
 use App\Events\FeedCreated;
-use App\Utils\Assert;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * Class Feed
@@ -37,4 +39,47 @@ class Feed extends Model
     protected $dispatchesEvents = [
         'created' => FeedCreated::class,
     ];
+
+    public static function query() : FeedBuilder
+    {
+        /** @var FeedBuilder $builder */
+        $builder = parent::query();
+
+        return $builder;
+    }
+
+    public function newEloquentBuilder($query): FeedBuilder
+    {
+        return new FeedBuilder($query);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Order by name ASC
+        static::addGlobalScope('order', static function (Builder $builder) {
+            $builder->orderBy('date', 'desc');
+        });
+    }
+
+    public function favoriteForUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'feed_user',
+            'feed_id',
+            'user_id')
+            ->wherePivot('is_favorite', true);
+    }
+
+    public function favoriteForUser($userId): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'feed_user',
+            'feed_id',
+            'user_id')
+            ->wherePivot('user_id', $userId);
+    }
 }

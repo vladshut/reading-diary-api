@@ -2,13 +2,17 @@
 
 namespace Tests;
 
+use App\Http\Resources\FeedResource;
+use App\Models\Feed;
 use App\Models\User;
 use Faker\Factory;
 use Faker\Generator;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\Assert as PHPUnit;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
-use Illuminate\Support\Arr;
+use Illuminate\Http\Request;
+use App\Utils\Arr;
 use Illuminate\Support\Facades\Artisan;
 use Tests\Constraints\CountInDatabase;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -320,15 +324,30 @@ abstract class TestCase extends BaseTestCase
 
     protected static function assertArrayHasArrayWithSubset(array $arr, array $subset): void
     {
-        $result = Arr::first($arr, static function ($item) use ($subset) {
-            $subsetFlatten = Arr::flatten($subset);
-            $itemFlatten = Arr::flatten($item);
-            return !array_diff($subsetFlatten, $itemFlatten);
+        $minDiff = null;
+
+        $result = Arr::first($arr, static function ($item) use ($subset, &$minDiff) {
+            $subsetFlatten = Arr::plainDot($subset);
+            $itemFlatten = Arr::plainDot($item);
+
+            $diff = array_diff_assoc($subsetFlatten, $itemFlatten);
+
+            if (empty($diff)) {
+                return true;
+            }
+
+            if (!$minDiff || count($diff) < count($minDiff)) {
+                $minDiff = $diff;
+            }
+
+            return false;
         });
 
         $arrStr = json_encode($arr, JSON_THROW_ON_ERROR);
         $subsetStr = json_encode($subset, JSON_THROW_ON_ERROR);
-        $message = "Array {$arrStr} does not have an array with the subset {$subsetStr}";
+        $minDiffStr = json_encode($minDiff, JSON_THROW_ON_ERROR);
+
+        $message = "Array \n {$arrStr} \n does not have an array with the subset \n {$subsetStr} \n Min diff is: \n {$minDiffStr}";
         self::assertNotNull($result, $message);
     }
 
@@ -343,5 +362,27 @@ abstract class TestCase extends BaseTestCase
             'followers_count' => $user->followers()->count(),
             'followees_count' => $user->followees()->count(),
         ];
+    }
+
+    protected static function assertModelResourceInArray(Model $model, array $array, bool $refresh = true): void
+    {
+        if ($refresh) {
+            $model = $model->refresh();
+        }
+
+        $modelClass = Arr::last(explode('\\', get_class($model)));
+        $resourceClass = "App\Http\Resources\\{$modelClass}Resource";
+
+        $feedResource = new $resourceClass($model);
+        $expectedData = $feedResource->toArray(new Request());
+
+        self::assertArrayHasArrayWithSubset($array, $expectedData);
+    }
+
+    protected static function assertModelsResourcesInArray(array $models, array $array, bool $refresh = true): void
+    {
+        foreach ($models as $model) {
+            self::assertModelResourceInArray($model, $array, $refresh);
+        }
     }
 }

@@ -14,17 +14,21 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
-final class GetPublishedReportFeedsByUserTest extends TestCase
+final class GetFavoriteFeedsTest extends TestCase
 {
-    public function testGetPublishedReportFeedsByUser(): void
+    public function testGetFavoriteFeeds(): void
     {
         Queue::fake();
         Notification::fake();
         Event::fake();
 
+        $perPage = 3;
         $feedsAuthor = $this->createUser();
+        $anotherUser = $this->createUser();
+        $user = $this->login();
 
-        $publishedReportsCount = 4;
+        $publishedReportsCount = 5;
+        $favoriteFeedsCount = 4;
 
         $feedFactory = new FeedFactory();
         $feeds = [];
@@ -35,20 +39,21 @@ final class GetPublishedReportFeedsByUserTest extends TestCase
             $userBook->publishReport();
             $feed = $feedFactory->reportPublished($userBook);
             $feed->save();
+            $feed->is_favorite = true;
             $feeds[] = $feed;
         }
 
-        $this->login();
-        $responseData = $this->jsonApiGet("feeds?type=report_published&author={$feedsAuthor->id}&per_page=3");
-
-        self::assertCount(3, $responseData['data']);
-
-        foreach (array_slice($feeds, 0, 3) as $feed) {
-            $feed = $feed->refresh();
-            $feedResource = new FeedResource($feed);
-            $expectedData = $feedResource->toArray(new Request());
-
-            self::assertArrayHasArrayWithSubset($responseData['data'], $expectedData);
+        for ($i = 0; $i < $favoriteFeedsCount; $i++) {
+            $user->addToFavoriteList($feeds[$i]);
+            $anotherUser->addToFavoriteList($feeds[$i]);
         }
+
+        $responseData = $this->jsonApiGet("feeds?type=report_published&is_favorite=1&per_page={$perPage}");
+
+        self::assertCount($perPage, $responseData['data']);
+        self::assertEquals($favoriteFeedsCount, $responseData['meta']['total']);
+
+        self::assertModelsResourcesInArray(array_slice($feeds, 0, $perPage), $responseData['data'], false);
+
     }
 }

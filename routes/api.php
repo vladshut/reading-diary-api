@@ -71,6 +71,9 @@ Route::group(['middleware' => ['auth:api']], static function () {
     Route::get('users/{user}/books/top-statuses', 'UserBookController@topStatuses');
 
     Route::get('feeds', 'FeedController@index');
+    Route::post('feeds/{feed}/favorite', 'FeedController@addToFavoriteList');
+    Route::delete('feeds/{feed}/favorite', 'FeedController@removeFromFavoriteList');
+    Route::get('feeds/my', 'FeedController@my');
 
     Route::resources([
         'authors' => 'AuthorController',

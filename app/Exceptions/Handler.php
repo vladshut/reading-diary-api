@@ -56,6 +56,9 @@ class Handler extends ExceptionHandler
             return $response;
         }
 
-        return parent::render($request, $exception);
+        $response = parent::render($request, $exception);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+
+        return $response;
     }
 }

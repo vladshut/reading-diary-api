@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @method static create(array $all)
  * @method static paginate()
+ * @property int id
  */
 class Author extends Model
 {

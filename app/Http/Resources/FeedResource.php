@@ -36,7 +36,7 @@ class FeedResource extends JsonResource
             'id' => $this->id,
             'author_id' => $this->author_id,
             'title' => $this->title,
-            'date' => $this->date->format('Y-m-d H:i:s'),
+            'date' => $this->date ? $this->date->format('Y-m-d H:i:s') : null,
             'body' => $this->body,
             'image' => $this->image,
             'type' => $this->type,
@@ -44,6 +44,7 @@ class FeedResource extends JsonResource
             'data' => $this->data,
             'author_name' => $this->author_name,
             'author_image' => $this->author_image,
+            'is_favorite' => $this->is_favorite
         ];
     }
 }

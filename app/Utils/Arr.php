@@ -55,4 +55,17 @@ final class Arr extends \Illuminate\Support\Arr
 
         return $array;
     }
+
+    public static function plainDot($array, $prepend = ''): array
+    {
+        $result = parent::dot($array, $prepend);
+
+        foreach ($result as $key => $value) {
+            if (is_array($value)) {
+                $result[$key] = json_encode($value);
+            }
+        }
+
+        return $result;
+    }
 }

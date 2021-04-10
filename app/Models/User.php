@@ -187,4 +187,37 @@ class User extends Authenticatable implements JWTSubject, HasMedia
         $this->followees()->detach($followee);
         $this->save();
     }
+
+    public function addToFavoriteList(Feed $feed): void
+    {
+        $this->attachFeed($feed);
+        $this->feeds()->updateExistingPivot($feed, ['is_favorite' => true]);
+    }
+
+    public function removeFromFavoriteList(Feed $feed): void
+    {
+        $this->favoriteFeeds()->updateExistingPivot($feed, ['is_favorite' => false]);
+    }
+
+    private function attachFeed(Feed $feed): void
+    {
+        if (!$this->feeds()->wherePivot('feed_id', $feed->id)->exists()) {
+            $this->feeds()->attach($feed, ['is_favorite' => false]);
+        }
+    }
+
+    public function feeds(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Feed::class,
+            'feed_user',
+            'user_id',
+            'feed_id');
+    }
+
+    public function favoriteFeeds(): BelongsToMany
+    {
+        return $this->feeds()
+            ->wherePivot('is_favorite', true);
+    }
 }

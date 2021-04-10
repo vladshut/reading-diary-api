@@ -20,7 +20,7 @@ class FeedCreated
     /**
      * Create a new event instance.
      *
-     * @param UserBook $userBook
+     * @param Feed $feed
      */
     public function __construct(Feed $feed)
     {
