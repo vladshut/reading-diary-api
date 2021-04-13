@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\Book;
 use App\Models\Author;
 use App\Models\UserBook;
+use Carbon\Carbon;
+use DateTimeImmutable;
 use JsonException;
 use Tests\DataStructures;
 use Tests\TestCase;
@@ -48,6 +50,85 @@ class UserBookTest extends TestCase
 
         $this->assertStructure($data, ['data' => ['*' => DataStructures::USER_BOOK]]);
         $this->assertCount($booksCount, $data['data']);
+    }
+
+    public function testMyBooksQuery(): void
+    {
+        $searchQuery = 'tItLe';
+
+        $booksCount = 5;
+        $user = $this->login();
+        $books = factory(Book::class, $booksCount)->create();
+
+        foreach ($books as $book) {
+            $user->addBook($book);
+        }
+
+        /** @var Book $expectedBook */
+        $expectedBook = factory(Book::class)->create(['title' => 'Super title!!!']);
+        $expectedUserBook = $user->addBook($expectedBook);
+
+        $data = $this->jsonApi('GET', "books/my?query={$searchQuery}");
+
+        $this->assertStructure($data, ['data' => ['*' => DataStructures::USER_BOOK]]);
+        self::assertCount(1, $data['data']);
+        self::assertEquals($expectedUserBook->id, $data['data']['0']['id']);
+        self::assertEquals($expectedBook->title, $data['data']['0']['book']['title']);
+        self::assertEquals($expectedBook->id, $data['data']['0']['book']['id']);
+    }
+
+    public function testMyBooksStatus(): void
+    {
+        $filterStatus = UserBook::STATUS_READING;
+
+        $booksCount = 5;
+        $user = $this->login();
+        $books = factory(Book::class, $booksCount)->create();
+
+        foreach ($books as $book) {
+            $user->addBook($book);
+        }
+
+        /** @var Book $expectedBook */
+        $expectedBook = factory(Book::class)->create();
+        $expectedUserBook = $user->addBook($expectedBook);
+        $expectedUserBook->startReading();
+
+        $data = $this->jsonApi('GET', "books/my?statuses[0]={$filterStatus}");
+
+        $this->assertStructure($data, ['data' => ['*' => DataStructures::USER_BOOK]]);
+        self::assertCount(1, $data['data']);
+        self::assertEquals($expectedUserBook->id, $data['data']['0']['id']);
+        self::assertEquals($expectedBook->title, $data['data']['0']['book']['title']);
+        self::assertEquals($expectedBook->id, $data['data']['0']['book']['id']);
+    }
+
+    public function testMyBooksSort(): void
+    {
+        $orderBy = 'created_at';
+        $orderDir = 'asc';
+
+        $booksCount = 5;
+        $user = $this->login();
+        $books = factory(Book::class, $booksCount)->create();
+
+        foreach ($books as $book) {
+            $user->addBook($book);
+        }
+
+        /** @var Book $expectedBook */
+        $expectedBook = factory(Book::class)->create();
+        $expectedUserBook = $user->addBook($expectedBook);
+        $expectedUserBook->created_at = Carbon::now()->subDays(30);
+        $expectedUserBook->save();
+
+        $data = $this->jsonApi('GET', "books/my?order_by={$orderBy}&order_dir={$orderDir}");
+
+        $this->assertStructure($data, ['data' => ['*' => DataStructures::USER_BOOK]]);
+        self::assertCount($booksCount + 1, $data['data']);
+        self::assertEquals($expectedUserBook->id, $data['data']['0']['id']);
+        self::assertEquals($expectedBook->title, $data['data']['0']['book']['title']);
+        self::assertEquals($expectedBook->id, $data['data']['0']['book']['id']);
     }
 
     public function testStore(): void

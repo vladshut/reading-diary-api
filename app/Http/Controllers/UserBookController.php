@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Http\Resources\UserBookResource;
+use App\Models\Feed;
 use App\Models\User;
 use App\Models\UserBook;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -18,11 +20,41 @@ class UserBookController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
+     * @param Request $request
+     * @return AnonymousResourceCollection
      */
-    public function myBooks(): AnonymousResourceCollection
+    public function myBooks(Request $request): AnonymousResourceCollection
     {
-        return UserBookResource::collection($this->getUser()->books()->paginate());
+        $validationRules = [
+            'query' => 'string|min:3',
+            'order_by' => 'nullable|string|in:created_at,updated_at',
+            'order_dir' => 'nullable|string|in:asc,desc',
+        ];
+
+        $this->validate($request, $validationRules);
+
+        $query = $request->get('query', null);
+        $statuses = $request->get('statuses', null);
+        $orderBy = $request->get('order_by', 'updated_at');
+        $orderDir = $request->get('order_dir', 'desc');
+        $perPage = $request->get('per_page', 20);
+
+        $booksQuery = $this->getUser()->books()->getQuery();
+        $booksQuery->with(['book', 'user']);
+
+        if ($query) {
+            $booksQuery->whereHas('book', static function (Builder $qb) use ($query) {
+                $qb->whereRaw("UPPER(title) LIKE '%" . strtoupper($query) . "%'");
+            });
+        }
+
+        if ($statuses) {
+            $booksQuery->where('status', '=', $statuses);
+        }
+
+        $booksQuery->orderBy($orderBy, $orderDir);
+
+        return UserBookResource::collection($booksQuery->paginate($perPage));
     }
 
     /**
@@ -81,7 +113,7 @@ class UserBookController extends Controller
     {
         $this->validate($request, ['book_id' => 'required']);
 
-        $book = Book::find($request->get('book_id'));
+        $book = Book::query()->find($request->get('book_id'));
 
         $userBook = $this->getUser()->addBook($book);
 
